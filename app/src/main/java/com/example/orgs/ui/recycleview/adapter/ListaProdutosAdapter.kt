@@ -1,47 +1,32 @@
 package com.example.orgs.ui.recycleview.adapter
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.orgs.R
+import com.example.orgs.databinding.ProdutoItemBinding
+import com.example.orgs.extensions.tentaCarregarImagem
 import com.example.orgs.ui.model.Produto
+import com.example.orgs.utilidades.formataParaMoedaBrasileira
 
 class ListaProdutosAdapter(
-    private val context: Context,
-    produtos: List<Produto>
+    val quandoClicaNoProduto: (Produto) -> Unit
+) : RecyclerView.Adapter<ListaProdutoViewHolder>() {
 
-) : RecyclerView.Adapter<ListaProdutosAdapter.ViewHolder>() {
+    private val produtos = mutableListOf<Produto>()
 
-    private val produtos = produtos.toMutableList()
-
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-
-        fun vincula(produto: Produto) {
-            val nome = itemView.findViewById<TextView>(R.id.produto_item_nome)
-            nome.text = produto.nome
-            val descricao = itemView.findViewById<TextView>(R.id.produto_item_descricao)
-            descricao.text = produto.descricao
-            val valor = itemView.findViewById<TextView>(R.id.produto_item_valor)
-            valor.text = produto.valor.toPlainString()
-        }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListaProdutoViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val binding = ProdutoItemBinding.inflate(inflater, parent, false)
+        return ListaProdutoViewHolder(binding)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-
-        val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(R.layout.produto_item, parent, false)
-        return ViewHolder(view)
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ListaProdutoViewHolder, position: Int) {
         val produto = produtos[position]
-        holder.vincula(produto)
+        holder.vincula(produto, this.quandoClicaNoProduto)
     }
 
-    override fun getItemCount(): Int = produtos.size
+    override fun getItemCount() = produtos.size
 
     fun atualiza(produtos: List<Produto>) {
         this.produtos.clear()
@@ -51,3 +36,35 @@ class ListaProdutosAdapter(
 
 }
 
+class ListaProdutoViewHolder(val binding: ProdutoItemBinding) : RecyclerView.ViewHolder(binding.root) {
+
+    /*
+        (Produto) -> Unit
+        uma função que recebe um objeto do tipo Produto e não retorna nada
+     */
+    fun vincula(
+        produto: Produto,
+        quandoClicaNoProduto: (Produto) -> Unit
+    ) {
+        binding.produtoItemNome.text = produto.nome
+        binding.produtoItemDescricao.text = produto.descricao
+        val valor = binding.produtoItemValor
+        val valorEmMoeda = formataParaMoedaBrasileira(produto.valor)
+        valor.text = valorEmMoeda
+
+        //  some com a caixa de imagem da lista caso ela seja null
+//        val visibilidade = if (produto.imagem != null) {
+//            View.VISIBLE
+//        } else {
+//            View.GONE
+//        }
+//
+//        binding.imageView.visibility = visibilidade
+        binding.imageView.tentaCarregarImagem(produto.imagem)
+
+        binding.root.setOnClickListener {
+            quandoClicaNoProduto(produto)
+        }
+    }
+
+}

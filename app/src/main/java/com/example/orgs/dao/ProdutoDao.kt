@@ -5,7 +5,7 @@ import com.example.orgs.ui.model.Produto
 
 class ProdutosDao {
 
-
+    // local para salvar os produtos
 
     fun adiciona(produto: Produto){
         produtos.add(produto)

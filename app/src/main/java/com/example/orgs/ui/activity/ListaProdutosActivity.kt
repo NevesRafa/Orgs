@@ -2,24 +2,22 @@ package com.example.orgs.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.orgs.R
 import com.example.orgs.dao.ProdutosDao
-import com.example.orgs.ui.model.Produto
+import com.example.orgs.databinding.ActivityListaProdutosBinding
 import com.example.orgs.ui.recycleview.adapter.ListaProdutosAdapter
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import java.math.BigDecimal
 
-class ListaProdutosActivity : AppCompatActivity(R.layout.activity_lista_produtos) {
+class ListaProdutosActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityListaProdutosBinding
     private val dao = ProdutosDao()
-    private val adapter = ListaProdutosAdapter(context = this, produtos = dao.buscaTodos())
+    private lateinit var adapter: ListaProdutosAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityListaProdutosBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         configuraRecyclerView()
         configuraFab()
     }
@@ -30,14 +28,19 @@ class ListaProdutosActivity : AppCompatActivity(R.layout.activity_lista_produtos
     }
 
     private fun configuraRecyclerView() {
-        val recyclerView = findViewById<RecyclerView>(R.id.activity_lista_produtos_recyclerView)
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        adapter = ListaProdutosAdapter(quandoClicaNoProduto = { prod ->
+            val intent = Intent(this, DetalhesProdutoActivity::class.java)
+
+            intent.putExtra(DetalhesProdutoActivity.EXTRA_PRODUTO_RECEBIDO, prod)
+
+            startActivity(intent)
+        })
+        binding.activityListaProdutosRecyclerView.adapter = adapter
+        binding.activityListaProdutosRecyclerView.layoutManager = LinearLayoutManager(this)
     }
 
     private fun configuraFab() {
-        val fAb = findViewById<FloatingActionButton>(R.id.activity_lista_produtos_fab)
-        fAb.setOnClickListener {
+        binding.activityListaProdutosFab.setOnClickListener {
             vaiParaFormularioProduto()
         }
     }
